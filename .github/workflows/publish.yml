@@ -9,9 +9,28 @@ on:
 permissions:
   contents: write
 
+env:
+  TAG: ${{ github.ref_name }}
+
 jobs:
-  publish:
+  create_release:
     if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Create or verify release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" &>/dev/null || \
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes
+
+  build_and_upload:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: create_release
     strategy:
       fail-fast: false
       matrix:
@@ -21,12 +40,10 @@ jobs:
           - platform: macos-latest
             args: "--target x86_64-apple-darwin"
     runs-on: ${{ matrix.platform }}
-    env:
-      RELEASE_TAG: ${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.RELEASE_TAG }}
+          ref: ${{ env.TAG }}
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -51,18 +68,18 @@ jobs:
 
       - name: Validate release tag
         run: |
-          if [[ -z "$RELEASE_TAG" ]]; then
-            echo "Missing RELEASE_TAG (push a v* tag)."
+          if [[ -z "$TAG" ]]; then
+            echo "Missing TAG (push a v* tag)."
             exit 1
           fi
-          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Invalid RELEASE_TAG: $RELEASE_TAG (expected vMAJOR.MINOR.PATCH)"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid TAG: $TAG (expected vMAJOR.MINOR.PATCH)"
             exit 1
           fi
 
       - name: Validate app version matches tag
         run: |
-          TAG_VERSION="${RELEASE_TAG#v}"
+          TAG_VERSION="${TAG#v}"
 
           TAURI_CONF_VERSION=$(node -p 'require("./src-tauri/tauri.conf.json").version')
           CARGO_VERSION=$(awk -F'"' '/^version =/ { print $2; exit }' ./src-tauri/Cargo.toml)
@@ -85,17 +102,11 @@ jobs:
         run: |
           APPLE_SIGNING_IDENTITY="-" bun run tauri build ${{ matrix.args }} 2>&1
 
-      - name: Upload artifacts to release
+      - name: Upload .dmg to release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="${{ env.RELEASE_TAG }}"
-
-          # Create release if it doesn't exist
-          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" &>/dev/null || \
-            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes
-
-          # Upload .dmg files
           for dmg in src-tauri/target/*/release/bundle/dmg/*.dmg; do
             [ -f "$dmg" ] && gh release upload "$TAG" "$dmg" --repo "$GITHUB_REPOSITORY" --clobber
+            echo "Uploaded: $dmg"
           done
