@@ -50,6 +50,7 @@ export function ProviderDetailPage({
         <UsageHistoryGraph
           providerId={plugin.meta.id}
           brandColor={plugin.meta.brandColor}
+          displayMode={displayMode}
         />
       </div>
     </div>

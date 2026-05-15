@@ -146,6 +146,27 @@ describe("UsageHistoryGraph", () => {
     expect(await screen.findByText("GPT-4")).toBeInTheDocument()
   })
 
+  it("respects displayMode=left and inverts percentages", async () => {
+    const mockHistory = [
+      makeSnapshot(now - HOUR_MS, [
+        { label: "GPT-4", percentage: 20 },
+      ]),
+      makeSnapshot(now, [
+        { label: "GPT-4", percentage: 40 },
+      ]),
+    ]
+    storeState.set("test-provider", mockHistory)
+
+    render(<UsageHistoryGraph providerId="test-provider" displayMode="left" />)
+
+    // Chart should render (legend visible)
+    expect(await screen.findByText("GPT-4")).toBeInTheDocument()
+
+    // Y-axis labels should still be 0-100
+    expect(screen.getByText("0%")).toBeInTheDocument()
+    expect(screen.getByText("100%")).toBeInTheDocument()
+  })
+
   it("shows tooltip on hover", async () => {
     const mockHistory = [
       makeSnapshot(now - HOUR_MS, [

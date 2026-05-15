@@ -520,8 +520,18 @@
       }
     }
 
-    // Team plans may omit `enabled` even with valid plan usage data.
-    if (usage.enabled === false || !usage.planUsage) {
+    // Legacy accounts may have enabled=false but still contain valid planUsage data.
+    // If planUsage is present and has valid usage info, treat as legacy and continue.
+    const hasValidPlanUsage = usage.planUsage && (
+      (typeof usage.planUsage.limit === "number" && Number.isFinite(usage.planUsage.limit)) ||
+      (typeof usage.planUsage.totalPercentUsed === "number" && Number.isFinite(usage.planUsage.totalPercentUsed))
+    )
+
+    if (usage.enabled === false && !hasValidPlanUsage) {
+      throw "No active Cursor subscription."
+    }
+
+    if (!usage.planUsage) {
       throw "No active Cursor subscription."
     }
 

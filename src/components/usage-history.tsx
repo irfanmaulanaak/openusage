@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { getHistory, type HistorySnapshot } from "@/lib/history-store"
+import type { DisplayMode } from "@/lib/settings"
 
 interface UsageHistoryGraphProps {
   providerId: string
   brandColor?: string
+  displayMode?: DisplayMode
 }
 
 const TIME_RANGES = [
@@ -72,7 +74,7 @@ function buildSmoothPath(
   return d
 }
 
-export function UsageHistoryGraph({ providerId }: UsageHistoryGraphProps) {
+export function UsageHistoryGraph({ providerId, displayMode = "used" }: UsageHistoryGraphProps) {
   const [rangeIndex, setRangeIndex] = useState(2) // Default: 24h (index 2)
   const [history, setHistory] = useState<HistorySnapshot[]>([])
   const [loading, setLoading] = useState(true)
@@ -122,7 +124,8 @@ export function UsageHistoryGraph({ providerId }: UsageHistoryGraphProps) {
       for (const snap of filtered) {
         const line = snap.lines.find((l) => l.label === label)
         if (line) {
-          points.push({ x: snap.timestamp, y: line.percentage })
+          const y = displayMode === "left" ? 100 - line.percentage : line.percentage
+          points.push({ x: snap.timestamp, y })
         }
       }
       return {
