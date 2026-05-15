@@ -24,7 +24,6 @@ OpenUsage lives in your menu bar and shows you how much of your AI coding subscr
 
 ## Supported Providers
 
-- [**Amp**](docs/providers/amp.md) / free tier, bonus, credits
 - [**Antigravity**](docs/providers/antigravity.md) / all models
 - [**Claude**](docs/providers/claude.md) / session, weekly, extra usage, local token usage (ccusage)
 - [**Codex**](docs/providers/codex.md) / session, weekly, reviews, credits
@@ -32,7 +31,6 @@ OpenUsage lives in your menu bar and shows you how much of your AI coding subscr
 - [**Cursor**](docs/providers/cursor.md) / credits, total usage, auto usage, API usage, on-demand, CLI auth
 - [**Factory / Droid**](docs/providers/factory.md) / standard, premium tokens
 - [**Gemini**](docs/providers/gemini.md) / pro, flash, workspace/free/paid tier
-- [**JetBrains AI Assistant**](docs/providers/jetbrains-ai-assistant.md) / quota, remaining
 - [**Kiro**](docs/providers/kiro.md) / credits, bonus credits, overages
 - [**Kimi Code**](docs/providers/kimi.md) / session, weekly
 - [**MiniMax**](docs/providers/minimax.md) / coding plan session
