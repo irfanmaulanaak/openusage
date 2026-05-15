@@ -83,7 +83,7 @@ jobs:
 
       - name: Build Tauri app (${{ matrix.args }})
         run: |
-          bun run tauri build ${{ matrix.args }} 2>&1
+          APPLE_SIGNING_IDENTITY="-" bun run tauri build ${{ matrix.args }} 2>&1
 
       - name: Upload artifacts to release
         env:
