@@ -81,16 +81,29 @@ jobs:
             exit 1
           fi
 
-      - uses: tauri-apps/tauri-action@v0
+      - name: Build Tauri app (${{ matrix.args }})
+        run: |
+          bun run tauri build ${{ matrix.args }} 2>&1
+
+      - name: Upload artifacts to release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: ${{ env.RELEASE_TAG }}
-          releaseName: ${{ env.RELEASE_TAG }}
-          releaseDraft: false
-          prerelease: false
-          includeUpdaterJson: true
-          args: ${{ matrix.args }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ env.RELEASE_TAG }}"
+
+          # Create release if it doesn't exist
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" &>/dev/null || \
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes
+
+          # Upload .dmg files
+          for dmg in src-tauri/target/*/release/bundle/dmg/*.dmg; do
+            [ -f "$dmg" ] && gh release upload "$TAG" "$dmg" --repo "$GITHUB_REPOSITORY" --clobber
+          done
+
+          # Upload latest.json if exists (from Tauri build)
+          for json in src-tauri/target/*/release/bundle/macos/latest.json; do
+            [ -f "$json" ] && gh release upload "$TAG" "$json" --repo "$GITHUB_REPOSITORY" --clobber
+          done
 
       - name: Verify updater manifest uploaded
         env:
