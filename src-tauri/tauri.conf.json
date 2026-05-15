@@ -57,7 +57,7 @@
       "resources/bundled_plugins/**/*",
       "icons/tray-icon.png"
     ],
-    "createUpdaterArtifacts": true
+    "createUpdaterArtifacts": false
   },
   "plugins": {
     "updater": {

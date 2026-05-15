@@ -99,16 +99,3 @@ jobs:
           for dmg in src-tauri/target/*/release/bundle/dmg/*.dmg; do
             [ -f "$dmg" ] && gh release upload "$TAG" "$dmg" --repo "$GITHUB_REPOSITORY" --clobber
           done
-
-          # Upload latest.json if exists (from Tauri build)
-          for json in src-tauri/target/*/release/bundle/macos/latest.json; do
-            [ -f "$json" ] && gh release upload "$TAG" "$json" --repo "$GITHUB_REPOSITORY" --clobber
-          done
-
-      - name: Verify updater manifest uploaded
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ASSETS=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | tr -d '\r')
-
-          printf '%s\n' "$ASSETS" | grep -Fxq 'latest.json' || { echo "Missing updater manifest: latest.json"; exit 1; }
