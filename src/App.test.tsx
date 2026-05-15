@@ -111,6 +111,16 @@ vi.mock("@tauri-apps/api/core", () => ({
   isTauri: state.isTauriMock,
 }))
 
+vi.mock("@tauri-apps/plugin-store", () => ({
+  LazyStore: class {
+    async get<T>(): Promise<T | null> {
+      return undefined as T | null
+    }
+    async set() {}
+    async save() {}
+  },
+}))
+
 vi.mock("@tauri-apps/api/event", () => ({
   listen: eventState.listenMock,
 }))

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { PluginOutput } from "@/lib/plugin-types"
 import type { PluginState } from "@/hooks/app/types"
+import { recordSnapshot } from "@/lib/history-store"
 
 type UseProbeStateArgs = {
   onProbeResult?: () => void
@@ -83,6 +84,11 @@ export function useProbeState({ onProbeResult }: UseProbeStateArgs) {
           },
         }
       })
+
+      // Persist history silently — no UI side-effects
+      if (!errorMessage) {
+        recordSnapshot(output.providerId, output.lines).catch(console.error)
+      }
 
       onProbeResult?.()
     },

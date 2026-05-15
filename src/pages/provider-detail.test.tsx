@@ -1,7 +1,17 @@
 import { render, screen } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { ProviderDetailPage } from "@/pages/provider-detail"
+
+vi.mock("@tauri-apps/plugin-store", () => ({
+  LazyStore: class {
+    async get<T>(): Promise<T | null> {
+      return undefined as T | null
+    }
+    async set() {}
+    async save() {}
+  },
+}))
 
 describe("ProviderDetailPage", () => {
   it("shows not found when plugin missing", () => {
