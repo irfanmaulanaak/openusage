@@ -72,7 +72,7 @@ function buildSmoothPath(
   return d
 }
 
-export function UsageHistoryGraph({ providerId, brandColor }: UsageHistoryGraphProps) {
+export function UsageHistoryGraph({ providerId }: UsageHistoryGraphProps) {
   const [rangeIndex, setRangeIndex] = useState(2) // Default: 24h (index 2)
   const [history, setHistory] = useState<HistorySnapshot[]>([])
   const [loading, setLoading] = useState(true)
@@ -141,7 +141,7 @@ export function UsageHistoryGraph({ providerId, brandColor }: UsageHistoryGraphP
   // Compute SVG coordinates
   const coords = useMemo(() => {
     if (allTimestamps.length === 0 || allPercentages.length === 0) {
-      return { xScale: 1, yScale: 1, minX: 0, maxX: 0, plotPoints: [] }
+      return { xScale: 1, yScale: 1, minX: 0, maxX: 0, mappedSeries: [] as never[] }
     }
 
     const minX = Math.min(...allTimestamps)
