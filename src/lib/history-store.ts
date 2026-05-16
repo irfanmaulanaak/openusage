@@ -36,7 +36,7 @@ function extractProgressLines(
 ): { label: string; percentage: number; used: number; limit: number }[] {
   const result: { label: string; percentage: number; used: number; limit: number }[] = []
   for (const line of lines) {
-    if (line.type === "progress") {
+    if (line.type === "progress" && line.format?.kind !== "count") {
       result.push({
         label: line.label,
         percentage: clamp01(line.used / line.limit) * 100,

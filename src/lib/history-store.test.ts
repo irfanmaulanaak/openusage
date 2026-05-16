@@ -30,7 +30,21 @@ function makeProgressLine(
     label,
     used,
     limit,
-    format: { kind: "count", suffix: "req" },
+    format: { kind: "percent" },
+  }
+}
+
+function makeCountProgressLine(
+  label: string,
+  used: number,
+  limit: number
+): MetricLine {
+  return {
+    type: "progress",
+    label,
+    used,
+    limit,
+    format: { kind: "count", suffix: "credits" },
   }
 }
 
@@ -83,6 +97,21 @@ describe("history-store", () => {
       expect(history).toHaveLength(1)
       expect(history[0].lines).toHaveLength(1)
       expect(history[0].lines[0].label).toBe("GPT-4")
+    })
+
+    it("skips count-based progress lines (e.g. Credits)", async () => {
+      const lines: MetricLine[] = [
+        makeProgressLine("Session", 50, 100),
+        makeCountProgressLine("Credits", 200, 1000),
+        makeProgressLine("Weekly", 30, 100),
+      ]
+      await recordSnapshot("test-provider", lines)
+
+      const history = await getHistory("test-provider")
+      expect(history).toHaveLength(1)
+      expect(history[0].lines).toHaveLength(2)
+      expect(history[0].lines[0].label).toBe("Session")
+      expect(history[0].lines[1].label).toBe("Weekly")
     })
 
     it("does not record if there are no progress lines", async () => {
