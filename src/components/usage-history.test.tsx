@@ -192,4 +192,29 @@ describe("UsageHistoryGraph", () => {
     const paths = container.querySelectorAll("path")
     expect(paths.length).toBeGreaterThan(0)
   })
+
+  it("filters out Credits line from chart", async () => {
+    const mockHistory = [
+      makeSnapshot(now - HOUR_MS, [
+        { label: "Session", percentage: 50 },
+        { label: "Credits", percentage: 20 },
+        { label: "Weekly", percentage: 30 },
+      ]),
+      makeSnapshot(now, [
+        { label: "Session", percentage: 60 },
+        { label: "Credits", percentage: 25 },
+        { label: "Weekly", percentage: 40 },
+      ]),
+    ]
+    storeState.set("test-provider", mockHistory)
+
+    render(<UsageHistoryGraph providerId="test-provider" />)
+
+    // Should show Session and Weekly
+    expect(await screen.findByText("Session")).toBeInTheDocument()
+    expect(screen.getByText("Weekly")).toBeInTheDocument()
+
+    // Credits should NOT appear in legend
+    expect(screen.queryByText("Credits")).not.toBeInTheDocument()
+  })
 })

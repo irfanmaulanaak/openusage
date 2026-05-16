@@ -109,11 +109,13 @@ export function UsageHistoryGraph({ providerId, displayMode = "used" }: UsageHis
       return { series: [], allTimestamps: [], allPercentages: [] }
     }
 
-    // Collect all unique labels across snapshots
+    // Collect all unique labels across snapshots (skip count-based like Credits)
     const labels = new Set<string>()
     for (const snap of filtered) {
       for (const line of snap.lines) {
-        labels.add(line.label)
+        if (line.label !== "Credits") {
+          labels.add(line.label)
+        }
       }
     }
     const labelList = Array.from(labels)
